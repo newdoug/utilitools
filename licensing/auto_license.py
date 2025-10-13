@@ -239,6 +239,7 @@ def main() -> int:
 
     one_liner_content = load_one_liner()
     config_env = load_config_env()
+
     if not parsed.project_name:
         if not config_env["[PROJECT_NAME]"]:
             print("[!] Project name must be given in config.env file or on command-line", file=sys.stderr)
@@ -247,10 +248,14 @@ def main() -> int:
         # Command-line value takes precedence
         config_env["[PROJECT_NAME]"] = parsed.project_name
 
+    if not os.path.isdir(parsed.root):
+        print("[!] Root path must be a directory", file=sys.stderr)
+        return 1
+
     if not parsed.no_git:
         expected_git_dir = os.path.join(parsed.root, ".git")
         if not os.path.isdir(expected_git_dir):
-            print("[!] Root path is expected to be a directory and also contain a .git sub-directory", file=sys.stderr)
+            print("[!] Root path is expected contain a .git sub-directory", file=sys.stderr)
             return 1
 
     license_file_templates = load_license_templates()
