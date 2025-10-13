@@ -1,4 +1,0 @@
-"""
-docstring
-"""
-print("YEEEE")

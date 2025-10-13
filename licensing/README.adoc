@@ -1,19 +1,12 @@
 = Instructions
 
 For repositories.
-Either do these steps manually or use the `auto_license.py` script in this directory like `python3 auto_license.py path/to/gitrepo -p [PROJECT_NAME]`.
-
-IMPORTANT: Before running this script, you should not have any staged changes in the repository directory.
-This script will modify a LOT of files, so if it does something you don't like, you will want to easily revert its changes using git.
-If you have a bunch of staged changes and then run this script and it does a bunch of stuff you don't like, you're going to have a hard time reverting everything without throwing away your real changes.
+Either do these steps manually or use the `auto_license.py` script in this directory like `python3 auto_license.py path/to/gitrepo -p [PROJECT_NAME]`
 
 == Steps
 
-If you're going to do this manually instead of running the script:
-
 * Put both `LICENSE-MIT.txt` and `LICENSE-COMMERCIAL.txt` in the root of your repository, after making sure they are acceptable and not just templates (they should contain contact info, project name, and year: the files in this directory here are TEMPLATES).
-
-* The file `license_one_liner.txt`: Put the contents of this file (after updating its content with the relevant project/contact details)  as a comment near the top of as many files as possible or at least in root entry points or modules where the most visibility is.
+* The file `license_one_liner.txt`: Put the contents of this file as a comment near the top of as many files as possible or at least in root entry points or modules where the most visibility is.
 
 * It is important that you should ALSO add a section like the following into your README:
 
