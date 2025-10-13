@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-import argparse
 from datetime import datetime as dt
 import os
 from pathlib import Path
@@ -99,7 +98,7 @@ def load_config_env() -> dict:
     if not config_env["[YEAR]"]:
         # NOTE: This uses en-dash because that's proper for date ranges.
         # Using "–present" indicates clear "this is still under development", but is not required for legal protection
-        config_env["[YEAR]"] = f"{dt.now().year}–present"
+        config_env["[YEAR]"] = f"{dt.now().year())}–present"
 
     if not config_env["[COPYRIGHT_HOLDER]"]:
         # Default value for this based on other values that are required
@@ -146,8 +145,9 @@ def insert_python_header(content, spdx_line):
         # fallback
         lines.insert(idx + 1, spdx_line + "\n")
         return "".join(lines)
-    lines.insert(idx, spdx_line + "\n")
-    return "".join(lines)
+    else:
+        lines.insert(idx, spdx_line + "\n")
+        return "".join(lines)
 
 
 def insert_block_comment_header(lines, spdx_line, comment_style):
@@ -170,25 +170,25 @@ def insert_block_comment_header(lines, spdx_line, comment_style):
         # No block, prepend with proper ending
         return spdx_line + " */\n\n" + "".join(lines)
     # Single-line comment style
-    if first_line.startswith(comment_style):
-        # Insert after first comment line
-        lines.insert(1, spdx_line + "\n")
-        return "".join(lines)
-    return spdx_line + "\n\n" + "".join(lines)
+    else:
+        if first_line.startswith(comment_style):
+            # Insert after first comment line
+            lines.insert(1, spdx_line + "\n")
+            return "".join(lines)
+        return spdx_line + "\n\n" + "".join(lines)
 
 
 def add_header_to_file(file_path, comment_style, spdx_line):
     with open(file_path, "r", encoding="utf-8") as f:
         content = f.read()
 
-    # If the one_liner file changes, this has to change too
     if "SPDX-License-Identifier: MIT-NC" in content:
         return False
 
     if file_path.endswith(".py"):
         new_content = insert_python_header(content, spdx_line)
     else:
-        lines = content.splitlines(keepends=True)
+        ines = content.splitlines(keepends=True)
         new_content = insert_block_comment_header(lines, spdx_line, comment_style)
 
     with open(file_path, "w", encoding="utf-8") as f:
@@ -205,15 +205,15 @@ def format_content(content: str, config_dict: dict) -> str:
 
 
 def update_readme(readme_filename: str | Path) -> None:
-    comment_chars_map = {
+    comment_chars = {
         ".adoc": ["=", "==", "==="],
         ".md": ["#"],
         ".txt": ["#"],
         # For files just named "README"
         "": ["#"],
-    }
-    ext = os.path.splitext(readme_filename)[1].lower()
-    comment_chars = comment_chars_map.get(ext, ["#"])
+    ]
+    ext = os.splitext(readme_filename)[1].lower()
+    comment_chars = comment_char.get(ext, ["#"])
     with open(readme_filename, "r", encoding="UTF-8") as handle:
         for line in handle.readlines():
             for comment_char in comment_chars:
@@ -231,7 +231,7 @@ def update_readme(readme_filename: str | Path) -> None:
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Auto-add license info to a repository")
-    parser.add_argument("root", help="Root directory of repo", type=Path)
+    parser.add_argument("root", help="Root directory of repo")
     parser.add_argument("-p", "--project-name", help="Project name of repo (use the casing you want it known by)")
     parser.add_argument("-v", "--verbose", help="Print extra outputs", action="store_true")
     parser.add_argument("--no-git", help="Don't check for given directory being a git repo", action="store_true")
@@ -240,46 +240,45 @@ def main() -> int:
     one_liner_content = load_one_liner()
     config_env = load_config_env()
     if not parsed.project_name:
-        if not config_env["[PROJECT_NAME]"]:
-            print("[!] Project name must be given in config.env file or on command-line", file=sys.stderr)
+        if not config["[PROJECT_NAME]"]:
+            print(f"[!] Project name must be given in config.env file or on command-line", file=sys.stderr)
             return 1
     else:
         # Command-line value takes precedence
-        config_env["[PROJECT_NAME]"] = parsed.project_name
+        config["[PROJECT_NAME]"] = parsed.project_name
 
     if not parsed.no_git:
         expected_git_dir = os.path.join(parsed.root, ".git")
         if not os.path.isdir(expected_git_dir):
-            print("[!] Root path is expected to be a directory and also contain a .git sub-directory", file=sys.stderr)
+            print(f"[!] Root path is expected to be a directory and also contain a .git sub-directory", file=sys.stderr)
             return 1
 
     license_file_templates = load_license_templates()
+    license_files = {filename: format_content(content) for filename, content in license_file_templates.items()}
     for filename, content in license_file_templates.items():
-        out_filename = parsed.root / os.path.basename(filename)
-        if os.path.exists(out_filename):
-            print(f"[+] License file already existed in directory '{parsed.root}': '{os.path.basename(filename)}'")
-            continue
-        with open(out_filename, "w", encoding="UTF-8") as handle:
+        out_filename = parsed.root / filename
+        with open(out_filename, "w") as handle:
             handle.write(format_content(content, config_env))
         print(f"[+] Just created license file '{out_filename}'")
 
     spdx_lines_added = 0
-    for root, _, files in os.walk(parsed.root):
+    for root, dirs, files in os.walk(parsed.root):
         for file in files:
-            if file.lower().startswith("readme"):
-                update_readme(os.path.join(root, file))
+            if file.lower().startswith("readme")
+                file_path = os.path.join(root, file)
+                update_readme(file_path)
                 continue
 
             ext = os.path.splitext(file)[1].lower()
             if ext in COMMENT_STYLES:
                 file_path = os.path.join(root, file)
                 comment_style = COMMENT_STYLES[ext]
-                spdx_line = f"{comment_style} {format_content(one_liner_content, config_env)}"
+                spdx_line = f"{comment_style} {format_content(one_liner_content)}"
                 if add_header_to_file(file_path, comment_style, spdx_line):
                     spdx_lines_added += 1
                     print(f"[+] Added SPDX header to: {file_path}")
             elif parsed.verbose:
-                print(f"[_] File didn't match a known file extension: '{file}'")
+                print(f"[_] File didn't match a known file extension: '{filename}'")
 
     print(f"\n[+] Done! SPDX headers added to {spdx_lines_added} files.")
     return 0
