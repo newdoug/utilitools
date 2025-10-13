@@ -1,0 +1,1 @@
+SPDX-License-Identifier: MIT-NC -- Free for personal/non-commercial use; contact [CONTACT_EMAIL] for commercial license

@@ -1,0 +1,19 @@
+= Instructions
+
+For repositories.
+Either do these steps manually or use the `auto_license.py` script in this directory like `python3 auto_license.py path/to/gitrepo -p [PROJECT_NAME]`
+
+== Steps
+
+* Put both `LICENSE-MIT.txt` and `LICENSE-COMMERCIAL.txt` in the root of your repository, after making sure they are acceptable and not just templates (they should contain contact info, project name, and year: the files in this directory here are TEMPLATES).
+* The file `license_one_liner.txt`: Put the contents of this file as a comment near the top of as many files as possible or at least in root entry points or modules where the most visibility is.
+
+* It is important that you should ALSO add a section like the following into your README:
+
+```adoc
+= License
+
+This project is free for personal, educational, or non-commercial use under the MIT License (see LICENSE-MIT.txt).
+
+Commercial use requires a separate license (see LICENSE-COMMERCIAL.txt).
+```
