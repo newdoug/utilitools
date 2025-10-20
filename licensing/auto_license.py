@@ -234,6 +234,9 @@ def main() -> int:
     parser.add_argument("root", help="Root directory of repo", type=Path)
     parser.add_argument("-p", "--project-name", help="Project name of repo (use the casing you want it known by)")
     parser.add_argument("-v", "--verbose", help="Print extra outputs", action="store_true")
+    parser.add_argument("-j", "--just-license-files",
+                        help="Just add license files, don't modify other files with headers",
+                        action="store_true")
     parser.add_argument("--no-git", help="Don't check for given directory being a git repo", action="store_true")
     parsed = parser.parse_args()
 
@@ -258,6 +261,7 @@ def main() -> int:
             print("[!] Root path is expected contain a .git sub-directory", file=sys.stderr)
             return 1
 
+    # Copy license files to destination after filling in templates
     license_file_templates = load_license_templates()
     for filename, content in license_file_templates.items():
         out_filename = parsed.root / os.path.basename(filename)
@@ -268,6 +272,10 @@ def main() -> int:
             handle.write(format_content(content, config_env))
         print(f"[+] Just created license file '{out_filename}'")
 
+    if parsed.just_license_files:
+        return 0
+
+    # Update various files automatically - READMEs, source headers, etc.
     spdx_lines_added = 0
     for root, _, files in os.walk(parsed.root):
         for file in files:
