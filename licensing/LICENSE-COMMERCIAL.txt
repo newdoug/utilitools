@@ -2,7 +2,7 @@ Commercial License for [PROJECT_NAME]
 
 Copyright (c) [YEAR] [COPYRIGHT_HOLDER]
 
-All rights reserved. 
+All rights reserved.
 
 The software [PROJECT_NAME] is free for personal, educational, and non-commercial use under the MIT License (Non-Commercial Use Only).
 
